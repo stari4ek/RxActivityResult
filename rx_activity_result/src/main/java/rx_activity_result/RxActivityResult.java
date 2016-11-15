@@ -86,7 +86,8 @@ public class RxActivityResult {
 
             activitiesLifecycle.getOLiveActivity().subscribe(new Action1<Activity>() {
                 @Override public void call(Activity activity) {
-                    activity.startActivity(new Intent(activity, HolderActivity.class));
+                    activity.startActivity(new Intent(activity, HolderActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
                 }
             });
 
