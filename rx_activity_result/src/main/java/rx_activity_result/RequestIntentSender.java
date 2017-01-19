@@ -27,7 +27,7 @@ public class RequestIntentSender extends Request {
     private final int flagsMask, flagsValues, extraFlags;
     private final Bundle options;
 
-    public RequestIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, Bundle options) {
+    public RequestIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, @Nullable Bundle options) {
         super(null);
         this.intentSender = intentSender;
         this.fillInIntent = fillInIntent;

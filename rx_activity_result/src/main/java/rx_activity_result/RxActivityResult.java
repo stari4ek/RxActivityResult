@@ -30,8 +30,10 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
-public class RxActivityResult {
+public final class RxActivityResult {
     static ActivitiesLifecycleCallbacks activitiesLifecycle;
+
+    private RxActivityResult() {}
 
     public static void register(final Application application) {
         activitiesLifecycle = new ActivitiesLifecycleCallbacks(application);
@@ -63,7 +65,7 @@ public class RxActivityResult {
             return startIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, null);
         }
 
-        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, Bundle options) {
+        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, @Nullable Bundle options) {
             RequestIntentSender requestIntentSender = new RequestIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, options);
             return startHolderActivity(requestIntentSender, null);
         }
@@ -72,11 +74,11 @@ public class RxActivityResult {
             return startIntent(intent, null);
         }
 
-        public Observable<Result<T>> startIntent(final Intent intent, OnPreResult onPreResult) {
+        public Observable<Result<T>> startIntent(final Intent intent, @Nullable OnPreResult onPreResult) {
             return startHolderActivity(new Request(intent), onPreResult);
         }
 
-        private Observable<Result<T>> startHolderActivity(Request request, OnPreResult onPreResult) {
+        private Observable<Result<T>> startHolderActivity(Request request, @Nullable OnPreResult onPreResult) {
 
             OnResult onResult = uiTargetActivity ? onResultActivity() : onResultFragment();
             request.setOnResult(onResult);
