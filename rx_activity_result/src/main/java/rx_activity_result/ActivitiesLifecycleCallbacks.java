@@ -3,6 +3,7 @@ package rx_activity_result;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
@@ -47,7 +48,7 @@ class ActivitiesLifecycleCallbacks {
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
     }
 
-    Activity getLiveActivity() {
+    @Nullable Activity getLiveActivity() {
         return liveActivityOrNull;
     }
 

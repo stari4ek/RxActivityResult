@@ -22,8 +22,6 @@ import android.content.IntentSender;
 import android.os.Bundle;
 
 import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 public class HolderActivity extends Activity {
     private static Request request;

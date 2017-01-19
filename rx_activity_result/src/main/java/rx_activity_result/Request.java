@@ -17,17 +17,18 @@
 package rx_activity_result;
 
 import android.content.Intent;
+import android.support.annotation.Nullable;
 
 class Request {
     private final Intent intent;
     private OnPreResult onPreResult;
     private OnResult onResult;
 
-    Request(Intent intent) {
+    Request(@Nullable Intent intent) {
         this.intent = intent;
     }
 
-    void setOnPreResult(OnPreResult onPreResult) {
+    void setOnPreResult(@Nullable OnPreResult onPreResult) {
         this.onPreResult = onPreResult;
     }
 
@@ -43,7 +44,7 @@ class Request {
         return onResult;
     }
 
-    Intent intent() {
+    @Nullable Intent intent() {
         return intent;
     }
 }
