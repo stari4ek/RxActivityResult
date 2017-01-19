@@ -31,7 +31,7 @@ import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 public class RxActivityResult {
-    private static ActivitiesLifecycleCallbacks activitiesLifecycle;
+    static ActivitiesLifecycleCallbacks activitiesLifecycle;
 
     public static void register(final Application application) {
         activitiesLifecycle = new ActivitiesLifecycleCallbacks(application);
@@ -106,7 +106,7 @@ public class RxActivityResult {
                     }
 
                     T activity = (T) activitiesLifecycle.getLiveActivity();
-                    subject.onNext(new Result<T>((T) activity, resultCode, data));
+                    subject.onNext(new Result<>(activity, resultCode, data));
                     subject.onCompleted();
                 }
             };
@@ -125,7 +125,7 @@ public class RxActivityResult {
                     Fragment targetFragment = getTargetFragment(fragmentManager.getFragments());
 
                     if(targetFragment != null) {
-                        subject.onNext(new Result<T>((T) targetFragment, resultCode, data));
+                        subject.onNext(new Result<>((T) targetFragment, resultCode, data));
                         subject.onCompleted();
                     }
 
@@ -135,7 +135,7 @@ public class RxActivityResult {
             };
         }
 
-        @Nullable private Fragment getTargetFragment(List<Fragment> fragments) {
+        @Nullable Fragment getTargetFragment(List<Fragment> fragments) {
             if (fragments == null) return null;
 
             for (Fragment fragment : fragments) {
