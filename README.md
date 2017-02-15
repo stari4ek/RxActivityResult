@@ -1,3 +1,5 @@
+## [DISCLAIMER] Branch 1.x will not be any longer actively maintained. Upgrade to RxJava 2.x asap.
+
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-RxActivityResult-green.svg?style=true)](https://android-arsenal.com/details/1/3284)
 
 [![Join the chat at https://gitter.im/VictorAlbertos/RxActivityResult](https://badges.gitter.im/VictorAlbertos/RxActivityResult.svg)](https://gitter.im/VictorAlbertos/RxActivityResult?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
