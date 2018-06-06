@@ -29,7 +29,9 @@ import android.support.v4.app.FragmentManager;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.subjects.PublishSubject;
 
 
@@ -90,15 +92,20 @@ public final class RxActivityResult {
 
             HolderActivity.setRequest(request);
 
-            activitiesLifecycle.getOLiveActivity().subscribe(new Consumer<Activity>() {
-                @Override
-                public void accept(Activity activity) throws Exception {
-                    activity.startActivity(new Intent(activity, HolderActivity.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
-                }
-            });
-
-            return subject;
+            return activitiesLifecycle.getOLiveActivity()
+                    .doOnNext(new Consumer<Activity>() {
+                        @Override
+                        public void accept(Activity activity) throws Exception {
+                            activity.startActivity(new Intent(activity, HolderActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
+                        }
+                    })
+                    .flatMap(new Function<Activity, ObservableSource<Result<T>>>() {
+                        @Override
+                        public ObservableSource<Result<T>> apply(Activity activity) throws Exception {
+                            return subject;
+                        }
+                    });
         }
 
         private OnResult onResultActivity() {
