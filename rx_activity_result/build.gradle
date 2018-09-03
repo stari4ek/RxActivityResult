@@ -1,15 +1,12 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-group='com.github.VictorAlbertos'
-version='0.4.4-2.x'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion verCompileSdk
+    buildToolsVersion verBuildTools
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 25
+        minSdkVersion verMinSdk
+        targetSdkVersion verTargetSdk
         versionCode 1
         versionName "1.0"
     }
@@ -22,15 +19,8 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-fragment:25.1.1'
-    compile "io.reactivex.rxjava2:rxjava:2.0.5"
+    compile "com.android.support:support-fragment:$verSupportLib"
+    compile "io.reactivex.rxjava2:rxjava:$verRxJava"
 
-    testCompile 'junit:junit:4.12'
-}
-
-install {
-    repositories.mavenInstaller {
-        pom.artifactId = 'RxActivityResult'
-    }
+    testImplementation "junit:junit:$verJUnitLib"
 }
