@@ -28,12 +28,14 @@ import android.support.v4.app.FragmentManager;
 
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 
 public final class RxActivityResult {
-    static ActivitiesLifecycleCallbacks activitiesLifecycle;
+
+    private static ActivitiesLifecycleCallbacks activitiesLifecycle;
 
     private RxActivityResult() {
     }
@@ -90,7 +92,7 @@ public final class RxActivityResult {
             HolderActivity.setRequest(request);
 
             return activitiesLifecycle
-                .getOLiveActivity()
+                .waitForActivity()
                 .doOnSuccess(activity ->
                                  activity.startActivity(
                                      new Intent(activity, HolderActivity.class)
@@ -103,17 +105,15 @@ public final class RxActivityResult {
             return new OnResult() {
                 @Override
                 public void response(int requestCode, int resultCode, Intent data) {
-                    if (activitiesLifecycle.getLiveActivity() == null) return;
-
-                    //If true it means some other activity has been stacked as a secondary process.
-                    //Wait until the current activity be the target activity
-                    if (activitiesLifecycle.getLiveActivity().getClass() != clazz) {
-                        return;
-                    }
-
-                    T activity = (T) activitiesLifecycle.getLiveActivity();
-                    subject.onNext(new Result<>(activity, requestCode, resultCode, data));
-                    subject.onComplete();
+                    // wait for proper activity
+                    activitiesLifecycle
+                        .observeActivities()
+                        //If does not match - some other activity has been stacked as a secondary process.
+                        //Wait until the current activity be the target activity
+                        .filter(activity -> activity.getClass() == clazz)
+                        .take(1)
+                        .map(activity -> new Result<>((T)activity, requestCode, resultCode, data))
+                        .subscribe(subject);
                 }
 
                 @Override
@@ -127,23 +127,22 @@ public final class RxActivityResult {
             return new OnResult() {
                 @Override
                 public void response(int requestCode, int resultCode, Intent data) {
-                    Activity activity = activitiesLifecycle.getLiveActivity();
-                    if (activity == null) {
-                        return;
-                    }
-
-                    FragmentActivity fragmentActivity = (FragmentActivity) activity;
-                    FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
-
-                    Fragment targetFragment = getTargetFragment(fragmentManager.getFragments());
-
-                    if (targetFragment != null) {
-                        subject.onNext(new Result<>((T) targetFragment, requestCode, resultCode, data));
-                        subject.onComplete();
-                    }
-
-                    //If code reaches this point it means some other activity has been stacked as a secondary process.
-                    //Do nothing until the current activity be the target activity to get the associated fragment
+                    // wait for proper fragment
+                    activitiesLifecycle
+                        .observeActivities()
+                        .flatMap((activity) -> {
+                            FragmentActivity fragmentActivity = (FragmentActivity)activity;
+                            FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
+                            Fragment targetFragment = getTargetFragment(fragmentManager.getFragments());
+                            if (targetFragment != null) {
+                                return Observable.just(new Result<>((T) targetFragment, requestCode, resultCode, data));
+                            } else {
+                                //If code reaches this point it means some other activity has been stacked as a secondary process.
+                                //Do nothing until the current activity be the target activity to get the associated fragment
+                                return Observable.empty();
+                            }
+                        }).take(1)
+                        .subscribe(subject);
                 }
 
                 @Override
