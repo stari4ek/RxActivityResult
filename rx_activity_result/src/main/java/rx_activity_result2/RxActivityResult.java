@@ -28,10 +28,7 @@ import android.support.v4.app.FragmentManager;
 
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
+import io.reactivex.Single;
 import io.reactivex.subjects.PublishSubject;
 
 
@@ -46,11 +43,11 @@ public final class RxActivityResult {
     }
 
     public static <T extends Activity> Builder<T> on(T activity) {
-        return new Builder<T>(activity);
+        return new Builder<>(activity);
     }
 
     public static <T extends Fragment> Builder<T> on(T fragment) {
-        return new Builder<T>(fragment);
+        return new Builder<>(fragment);
     }
 
     public static class Builder<T> {
@@ -58,7 +55,7 @@ public final class RxActivityResult {
         final PublishSubject<Result<T>> subject = PublishSubject.create();
         private final boolean uiTargetActivity;
 
-        public Builder(T t) {
+        Builder(T t) {
             if (activitiesLifecycle == null) {
                 throw new IllegalStateException(Locale.RX_ACTIVITY_RESULT_NOT_REGISTER);
             }
@@ -67,24 +64,24 @@ public final class RxActivityResult {
             this.uiTargetActivity = t instanceof Activity;
         }
 
-        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags) {
+        public Single<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags) {
             return startIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, null);
         }
 
-        public Observable<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, @Nullable Bundle options) {
+        public Single<Result<T>> startIntentSender(IntentSender intentSender, @Nullable Intent fillInIntent, int flagsMask, int flagsValues, int extraFlags, @Nullable Bundle options) {
             RequestIntentSender requestIntentSender = new RequestIntentSender(intentSender, fillInIntent, flagsMask, flagsValues, extraFlags, options);
             return startHolderActivity(requestIntentSender, null);
         }
 
-        public Observable<Result<T>> startIntent(final Intent intent) {
+        public Single<Result<T>> startIntent(final Intent intent) {
             return startIntent(intent, null);
         }
 
-        public Observable<Result<T>> startIntent(final Intent intent, @Nullable OnPreResult onPreResult) {
+        public Single<Result<T>> startIntent(final Intent intent, @Nullable OnPreResult onPreResult) {
             return startHolderActivity(new Request(intent), onPreResult);
         }
 
-        private Observable<Result<T>> startHolderActivity(Request request, @Nullable OnPreResult onPreResult) {
+        private Single<Result<T>> startHolderActivity(Request request, @Nullable OnPreResult onPreResult) {
 
             OnResult onResult = uiTargetActivity ? onResultActivity() : onResultFragment();
             request.setOnResult(onResult);
@@ -92,20 +89,14 @@ public final class RxActivityResult {
 
             HolderActivity.setRequest(request);
 
-            return activitiesLifecycle.getOLiveActivity()
-                    .doOnNext(new Consumer<Activity>() {
-                        @Override
-                        public void accept(Activity activity) throws Exception {
-                            activity.startActivity(new Intent(activity, HolderActivity.class)
-                                    .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION));
-                        }
-                    })
-                    .flatMap(new Function<Activity, ObservableSource<Result<T>>>() {
-                        @Override
-                        public ObservableSource<Result<T>> apply(Activity activity) throws Exception {
-                            return subject;
-                        }
-                    });
+            return activitiesLifecycle
+                .getOLiveActivity()
+                .doOnSuccess(activity ->
+                                 activity.startActivity(
+                                     new Intent(activity, HolderActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                                     ))
+                .flatMap(ignored -> subject.firstOrError());
         }
 
         private OnResult onResultActivity() {
@@ -136,9 +127,10 @@ public final class RxActivityResult {
             return new OnResult() {
                 @Override
                 public void response(int requestCode, int resultCode, Intent data) {
-                    if (activitiesLifecycle.getLiveActivity() == null) return;
-
                     Activity activity = activitiesLifecycle.getLiveActivity();
+                    if (activity == null) {
+                        return;
+                    }
 
                     FragmentActivity fragmentActivity = (FragmentActivity) activity;
                     FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
@@ -163,15 +155,19 @@ public final class RxActivityResult {
 
         @Nullable
         Fragment getTargetFragment(List<Fragment> fragments) {
-            if (fragments == null) return null;
+            if (fragments == null) {
+                return null;
+            }
 
             for (Fragment fragment : fragments) {
-                if (fragment != null && fragment.isVisible() && fragment.getClass() == clazz) {
+                if (fragment.isVisible() && fragment.getClass() == clazz) {
                     return fragment;
-                } else if (fragment != null && fragment.isAdded() && fragment.getChildFragmentManager() != null) {
+                } else if (fragment.isAdded()) {
                     List<Fragment> childFragments = fragment.getChildFragmentManager().getFragments();
                     Fragment candidate = getTargetFragment(childFragments);
-                    if (candidate != null) return candidate;
+                    if (candidate != null) {
+                        return candidate;
+                    }
                 }
             }
 

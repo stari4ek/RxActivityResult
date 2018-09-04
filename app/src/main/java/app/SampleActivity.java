@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import io.reactivex.disposables.Disposable;
 import io.victoralbertos.app.R;
 import rx_activity_result2.RxActivityResult;
 
@@ -24,17 +25,19 @@ public class SampleActivity extends AppCompatActivity {
 
     private void camera() {
         Intent takePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        RxActivityResult.on(this).startIntent(takePhoto)
-                .subscribe(result -> {
-                    Intent data = result.data();
-                    int resultCode = result.resultCode();
+        @SuppressWarnings("unused") Disposable ignored = RxActivityResult
+            .on(this)
+            .startIntent(takePhoto)
+            .subscribe(result -> {
+                Intent data = result.data();
+                int resultCode = result.resultCode();
 
-                    if (resultCode == RESULT_OK) {
-                        result.targetUI().showImage(data);
-                    } else {
-                        result.targetUI().printUserCanceled();
-                    }
-                }, Throwable::printStackTrace);
+                if (resultCode == RESULT_OK) {
+                    result.targetUI().showImage(data);
+                } else {
+                    result.targetUI().printUserCanceled();
+                }
+            }, Throwable::printStackTrace);
     }
 
     private void showImage(Intent data) {
@@ -46,10 +49,14 @@ public class SampleActivity extends AppCompatActivity {
         Intent intent  = new Intent("sample.intentsender.intent.AN_INTENT");
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 1, intent, 0);
 
-        RxActivityResult.on(this).startIntentSender(pendingIntent.getIntentSender(), new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0))
-                .subscribe(result -> {
-                    if (result.resultCode() != RESULT_OK) result.targetUI().printUserCanceled();
-                });
+        @SuppressWarnings("unused") Disposable ignored = RxActivityResult
+            .on(this)
+            .startIntentSender(pendingIntent.getIntentSender(), new Intent(), 0, 0, 0)
+            .subscribe(result -> {
+                if (result.resultCode() != RESULT_OK) {
+                    result.targetUI().printUserCanceled();
+                }
+            });
     }
 
     private void printUserCanceled() {

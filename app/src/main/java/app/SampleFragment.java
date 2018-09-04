@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,14 +14,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import io.reactivex.disposables.Disposable;
 import io.victoralbertos.app.R;
 import rx_activity_result2.RxActivityResult;
 
 public class SampleFragment extends Fragment {
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.sample_layout, container, false);
-        return view;
+    @Override public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.sample_layout, container, false);
     }
 
     @Override public void onActivityCreated(Bundle savedInstanceState) {
@@ -32,17 +33,19 @@ public class SampleFragment extends Fragment {
     private void camera() {
         Intent takePhoto = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        RxActivityResult.on(this).startIntent(takePhoto)
-               .subscribe(result -> {
-                   Intent data = result.data();
-                   int resultCode = result.resultCode();
+        @SuppressWarnings("unused") Disposable ignored = RxActivityResult
+            .on(this)
+            .startIntent(takePhoto)
+            .subscribe(result -> {
+                Intent data = result.data();
+                int resultCode = result.resultCode();
 
-                   if (resultCode == Activity.RESULT_OK) {
-                       result.targetUI().showImage(data);
-                   } else {
-                       result.targetUI().printUserCanceled();
-                   }
-               });
+                if (resultCode == Activity.RESULT_OK) {
+                   result.targetUI().showImage(data);
+                } else {
+                   result.targetUI().printUserCanceled();
+                }
+            });
     }
 
     private void showImage(Intent data) {
@@ -54,10 +57,14 @@ public class SampleFragment extends Fragment {
         Intent intent  = new Intent("sample.intentsender.intent.AN_INTENT");
         PendingIntent pendingIntent = PendingIntent.getActivity(getActivity(), 1, intent, 0);
 
-        RxActivityResult.on(this).startIntentSender(pendingIntent.getIntentSender(), new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0))
-                .subscribe(result -> {
-                    if (result.resultCode() != Activity.RESULT_OK) result.targetUI().printUserCanceled();
-                });
+        @SuppressWarnings("unused") Disposable ignored = RxActivityResult
+            .on(this)
+            .startIntentSender(pendingIntent.getIntentSender(), new Intent(), 0, 0, 0)
+            .subscribe(result -> {
+                if (result.resultCode() != Activity.RESULT_OK) {
+                    result.targetUI().printUserCanceled();
+                }
+            });
     }
 
     private void printUserCanceled() {

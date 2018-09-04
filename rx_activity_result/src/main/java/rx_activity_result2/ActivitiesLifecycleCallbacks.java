@@ -6,8 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
+import io.reactivex.Single;
 import java.util.concurrent.TimeUnit;
 
 class ActivitiesLifecycleCallbacks {
@@ -15,7 +14,11 @@ class ActivitiesLifecycleCallbacks {
     volatile Activity liveActivityOrNull;
     Application.ActivityLifecycleCallbacks activityLifecycleCallbacks;
 
-    public ActivitiesLifecycleCallbacks(Application application) {
+    private final Application application;
+    private volatile Activity liveActivityOrNull;
+    private Application.ActivityLifecycleCallbacks activityLifecycleCallbacks;
+
+    ActivitiesLifecycleCallbacks(Application application) {
         this.application = application;
         registerActivityLifeCycle();
     }
@@ -56,34 +59,12 @@ class ActivitiesLifecycleCallbacks {
      * Emits just one time a valid reference to the current activity
      * @return the current activity
      */
-    volatile boolean emitted = false;
-    Observable<Activity> getOLiveActivity() {
-        emitted = false;
+    Single<Activity> getOLiveActivity() {
         return Observable.interval(50, 50, TimeUnit.MILLISECONDS)
-                .map(new Function<Long, Object>() {
-                    @Override public Object apply(Long aLong) throws Exception {
-                        if (liveActivityOrNull == null) return 0;
-                        return liveActivityOrNull;
-                    }
-                })
-                .takeWhile(new Predicate<Object>() {
-                    @Override public boolean test(Object candidate) throws Exception {
-                        boolean continueEmitting = true;
-                        if (emitted) continueEmitting = false;
-                        if (candidate instanceof Activity) emitted = true;
-                        return continueEmitting;
-                    }
-                })
-                .filter(new Predicate<Object>() {
-                    @Override public boolean test(Object candidate) throws Exception {
-                        return candidate instanceof Activity;
-                    }
-                })
-                .map(new Function<Object, Activity>() {
-                    @Override public Activity apply(Object activity) throws Exception {
-                        return (Activity) activity;
-                    }
-                });
+            .flatMap(ignored -> {
+                if (liveActivityOrNull == null) return Observable.empty();
+                return Observable.just(liveActivityOrNull);
+            }).firstOrError();
     }
 
 }

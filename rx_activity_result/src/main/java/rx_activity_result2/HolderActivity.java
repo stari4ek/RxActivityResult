@@ -16,22 +16,24 @@
 
 package rx_activity_result2;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 
-import io.reactivex.functions.Action;
 
-public class HolderActivity extends Activity {
+public class HolderActivity extends FragmentActivity {
+    private static final int FAILED_REQUEST_CODE = -909;
+
     private static Request request;
+
     private OnPreResult onPreResult;
     private OnResult onResult;
     private int resultCode;
     private int requestCode;
     private Intent data;
-    private static int FAILED_REQUEST_CODE = -909;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +51,7 @@ public class HolderActivity extends Activity {
 
         if (request instanceof RequestIntentSender) {
             RequestIntentSender requestIntentSender = (RequestIntentSender) request;
-
-            if (requestIntentSender.getOptions() == null) startIntentSender(requestIntentSender);
-            else startIntentSenderWithOptions(requestIntentSender);
+            startIntentSender(requestIntentSender);
         } else {
             try {
                 startActivityForResult(request.intent(), 0);
@@ -65,20 +65,12 @@ public class HolderActivity extends Activity {
 
     private void startIntentSender(RequestIntentSender requestIntentSender) {
         try {
-            startIntentSenderForResult(requestIntentSender.getIntentSender(), 0,
-                    requestIntentSender.getFillInIntent(), requestIntentSender.getFlagsMask(),
-                    requestIntentSender.getFlagsValues(), requestIntentSender.getExtraFlags());
-        } catch (IntentSender.SendIntentException exception) {
-            exception.printStackTrace();
-            onResult.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null);
-        }
-    }
-
-    private void startIntentSenderWithOptions(RequestIntentSender requestIntentSender) {
-        try {
-            startIntentSenderForResult(requestIntentSender.getIntentSender(), 0,
-                    requestIntentSender.getFillInIntent(), requestIntentSender.getFlagsMask(),
-                    requestIntentSender.getFlagsValues(), requestIntentSender.getExtraFlags(), requestIntentSender.getOptions());
+            ActivityCompat.startIntentSenderForResult(
+                this,
+                requestIntentSender.getIntentSender(), 0,
+                requestIntentSender.getFillInIntent(), requestIntentSender.getFlagsMask(),
+                requestIntentSender.getFlagsValues(), requestIntentSender.getExtraFlags(),
+                requestIntentSender.getOptions());
         } catch (IntentSender.SendIntentException exception) {
             exception.printStackTrace();
             onResult.response(FAILED_REQUEST_CODE, RESULT_CANCELED, null);
@@ -93,14 +85,10 @@ public class HolderActivity extends Activity {
         this.data = data;
 
         if (this.onPreResult != null) {
-            this.onPreResult.response(requestCode, resultCode, data)
-                    .doOnComplete(new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            finish();
-                        }
-                    })
-                    .subscribe();
+            this.onPreResult
+                .response(requestCode, resultCode, data)
+                .doOnComplete(this::finish)
+                .subscribe();
         } else {
             finish();
         }
@@ -109,8 +97,9 @@ public class HolderActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (onResult != null)
+        if (onResult != null) {
             onResult.response(requestCode, resultCode, data);
+        }
     }
 
     static void setRequest(Request aRequest) {
