@@ -1,11 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+    ext {
+        verBuildTools = '28.0.2'
+
+        verCompileSdk = 28
+        verMinSdk = 21
+        verTargetSdk = 27
+
+        // libs
+        // android support libs (support-annotations, support-v13, leanback-v17, ...)
+        verSupportLib = '27.1.1'
+        verRxJava = '2.2.1'
+
+        verJUnitLib = '4.12'
+    }
     repositories {
+        google()
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.2.0-rc02'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -14,6 +29,7 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
         jcenter()
     }
 }

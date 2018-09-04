@@ -19,8 +19,8 @@ android {
 }
 
 dependencies {
-    compile "com.android.support:support-fragment:$verSupportLib"
-    compile "io.reactivex.rxjava2:rxjava:$verRxJava"
+    implementation "com.android.support:support-fragment:$verSupportLib"
+    implementation "io.reactivex.rxjava2:rxjava:$verRxJava"
 
     testImplementation "junit:junit:$verJUnitLib"
 }
