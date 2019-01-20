@@ -72,7 +72,7 @@ class ActivitiesLifecycleCallbacks {
 
     Observable<Activity> observeActivities() {
         return subject
-            .distinct()
+            .distinctUntilChanged()
             .filter((wrapped) -> !wrapped.isEmpty())
             .map((wrapped) -> wrapped.activity);
     }
