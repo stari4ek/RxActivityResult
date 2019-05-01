@@ -19,7 +19,7 @@ package rx_activity_result2;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 public class RequestIntentSender extends Request {
     private final IntentSender intentSender;

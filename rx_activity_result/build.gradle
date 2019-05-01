@@ -23,7 +23,8 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:support-fragment:$verSupportLib"
+    api 'androidx.fragment:fragment:1.0.0'
+    api 'androidx.core:core:1.0.1'
     implementation "io.reactivex.rxjava2:rxjava:$verRxJava"
 
     testImplementation "junit:junit:$verJUnitLib"

@@ -17,7 +17,7 @@ android {
         targetSdkVersion verTargetSdk
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -37,32 +37,40 @@ android {
 dependencies {
     implementation project(":rx_activity_result")
 
-    implementation "com.android.support:appcompat-v7:$verSupportLib"
-    implementation "com.android.support:design:$verSupportLib"
-
     implementation "io.reactivex.rxjava2:rxjava:$verRxJava"
 
+    implementation('androidx.appcompat:appcompat:1.0.2') {
+        exclude group: "androidx.legacy", module: "legacy-support-core-utils"
+    }
+    implementation('com.google.android.material:material:1.0.0'){
+        exclude group: "androidx.legacy", module: "legacy-support-core-utils"
+    }
+
     testImplementation "junit:junit:$verJUnitLib"
-    androidTestImplementation ("com.android.support.test:runner:0.4.1") {
-        exclude module: 'support-annotations'
+    androidTestImplementation('androidx.test:runner:1.1.0') {
+        exclude module: 'annotation'
     }
-    androidTestImplementation ("com.android.support.test:rules:0.4.1") {
-        exclude module: 'support-annotations'
-    }
-
-    androidTestImplementation ("com.android.support.test.espresso:espresso-intents:2.2.1") {
-        exclude module: 'support-annotations'
-        exclude module: 'support-v4'
-        exclude module: 'support-v13'
-        exclude module: 'recyclerview-v7'
+    androidTestImplementation('androidx.test:rules:1.1.0') {
+        exclude module: 'annotation'
     }
 
-    androidTestImplementation ("com.android.support.test.espresso:espresso-contrib:2.2.1") {
-        exclude module: 'support-annotations'
-        exclude module: 'support-v4'
-        exclude module: 'support-v13'
-        exclude module: 'recyclerview-v7'
+    androidTestImplementation('androidx.test.ext:junit:1.0.0') {
+        exclude module: 'annotation'
     }
 
-    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.3'
+    androidTestImplementation('androidx.test.espresso:espresso-intents:3.1.0') {
+        exclude module: 'annotation'
+        exclude module: 'legacy-support-v4'
+        exclude module: 'legacy-support-v13'
+        exclude module: 'recyclerview'
+    }
+
+    androidTestImplementation('androidx.test.espresso:espresso-contrib:3.1.0') {
+        exclude module: 'annotation'
+        exclude module: 'legacy-support-v4'
+        exclude module: 'legacy-support-v13'
+        exclude module: 'recyclerview'
+    }
+
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 }

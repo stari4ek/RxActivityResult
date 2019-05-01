@@ -2,7 +2,7 @@ package app;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 import app.multi_start.MultiStartActivity;
 import io.victoralbertos.app.R;

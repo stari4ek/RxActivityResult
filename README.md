@@ -26,8 +26,8 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile 'com.github.VictorAlbertos:RxActivityResult:0.4.5-2.x'
-    compile 'io.reactivex.rxjava2:rxjava:2.0.5'
+    implementation 'com.github.VictorAlbertos:RxActivityResult:0.5.0-2.x'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.3'
 }
 ```
 
@@ -47,7 +47,7 @@ public class SampleApp extends Application {
 You can call `RxActivityResult.on(this).startIntent(intent)` supplying both, an `Activity` instance or a `Fragment` instance.
 Observe the emitted [Result](https://github.com/VictorAlbertos/RxActivityResult/blob/master/rx_activity_result/src/main/java/rx_activity_result/Result.java) item to know the resultCode and retrieve the associated data if appropriate.  
 
-**Limitation:**: Your fragments need to extend from `android.support.v4.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified. 
+**Limitation:** Your fragments need to extend from `androidx.fragment.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified.
 
 
 ```java
